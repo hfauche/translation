@@ -29,11 +29,11 @@ import javax.swing.JScrollPane;
 import org.iru.translation.TranslationException;
 import org.iru.translation.properties.PropertiesManager;
 
-public class Application extends JPanel implements ActionListener {
-    
-    private final static JButton fromOpenButton = new JButton("Choose from file");
-    private final static JButton toOpenButton = new JButton("Choose to file");
-    private final static JButton diffButton = new JButton("Diff");
+public class Application extends JFrame implements ActionListener {
+    private final JPanel mainPanel = new JPanel(new BorderLayout());
+    private final JButton fromOpenButton = new JButton("Choose from file");
+    private final JButton toOpenButton = new JButton("Choose to file");
+    private final JButton diffButton = new JButton("Diff");
     private final JLabel fromLabel = new JLabel("From: -");
     private final JLabel toLabel = new JLabel("To: -");
     private final JFileChooser fc = new JFileChooser();
@@ -44,7 +44,27 @@ public class Application extends JPanel implements ActionListener {
     private Properties toProps, fromProps;
 
     public Application() {
-        super(new BorderLayout());
+        //Create and set up the window.
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Translation tool");
+        
+        //Create and set up the content pane.
+        mainPanel.setOpaque(true);
+        setContentPane(mainPanel);
+        
+        fromOpenButton.addActionListener(this);
+        toOpenButton.addActionListener(this);
+        diffButton.addActionListener(this);
+
+        JMenuBar toolbar = new JMenuBar();
+        toolbar.setOpaque(true);
+        toolbar.setPreferredSize(new Dimension(200, 40));
+        toolbar.add(fromOpenButton);
+        toolbar.add(toOpenButton);
+        toolbar.add(diffButton);
+ 
+        setJMenuBar(toolbar);
+
         list.setFont(new Font("Courier", Font.PLAIN, 14));
         list.setCellRenderer(new PropertyListCellRender());
         JPanel files = new JPanel(new GridLayout(1, 2));
@@ -118,28 +138,7 @@ public class Application extends JPanel implements ActionListener {
      * event-dispatching thread.
      */
     private static void createAndShowGUI() {
-        //Create and set up the window.
-        JFrame frame = new JFrame("Translations Tool");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Create and set up the content pane.
-        Application newContentPane = new Application();
-        newContentPane.setOpaque(true); //content panes must be opaque
-        frame.setContentPane(newContentPane);
-        
-        fromOpenButton.addActionListener(newContentPane);
-        toOpenButton.addActionListener(newContentPane);
-        diffButton.addActionListener(newContentPane);
-
-        JMenuBar toolbar = new JMenuBar();
-        toolbar.setOpaque(true);
-        toolbar.setPreferredSize(new Dimension(200, 40));
-        toolbar.add(fromOpenButton);
-        toolbar.add(toOpenButton);
-        toolbar.add(diffButton);
- 
-        frame.setJMenuBar(toolbar);
-
+        JFrame frame = new Application();
         frame.setSize(700, 500);
         frame.setLocationRelativeTo(null);//center
         frame.setVisible(true);
