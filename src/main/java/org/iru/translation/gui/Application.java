@@ -4,8 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,11 +30,11 @@ import org.iru.translation.properties.PropertiesManager;
 
 public class Application extends JPanel implements ActionListener {
     
-    final static JButton fromOpenButton = new JButton("Choose from file");
-    final static JButton toOpenButton = new JButton("Choose to file");
-    final static JButton diffButton = new JButton("Diff");
-    private final JLabel fromLabel = new JLabel("From: None");
-    private final JLabel toLabel = new JLabel("To: None");
+    private final static JButton fromOpenButton = new JButton("Choose from file");
+    private final static JButton toOpenButton = new JButton("Choose to file");
+    private final static JButton diffButton = new JButton("Diff");
+    private final JLabel fromLabel = new JLabel("From: -");
+    private final JLabel toLabel = new JLabel("To: -");
     private final JFileChooser fc = new JFileChooser();
     private final PropertiesManager propertiesManager = new PropertiesManager();
     private final PropertyModel listModel = new PropertyModel();
@@ -46,6 +51,23 @@ public class Application extends JPanel implements ActionListener {
         files.add(toLabel);
         add(files, BorderLayout.NORTH);
         add(jScrollPane, BorderLayout.CENTER);
+        
+        addCopyCapability();
+        manageButtons();
+
+    }
+
+    private void addCopyCapability() {
+        list.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == 67 && e.isControlDown()) {
+                    Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clpbrd.setContents(new StringSelection(listModel.getElementAt(list.getSelectedIndex()).getKey()), null);
+                    e.consume();
+                }
+            }
+        });
     }
     
     @Override
@@ -86,6 +108,7 @@ public class Application extends JPanel implements ActionListener {
             listModel.clear();
             listModel.setValues(propertiesManager.diff(fromProps, toProps));
         }
+        manageButtons();
     }
 
    /**
@@ -129,6 +152,10 @@ public class Application extends JPanel implements ActionListener {
                 createAndShowGUI();
             }
         });
+    }
+
+    private void manageButtons() {
+        diffButton.setEnabled(!(fromProps == null) && !(toProps == null));
     }
    
 
