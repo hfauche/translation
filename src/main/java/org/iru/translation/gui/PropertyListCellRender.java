@@ -1,5 +1,6 @@
 package org.iru.translation.gui;
 
+import org.iru.translation.properties.PropertyModel;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
@@ -22,6 +23,9 @@ public class PropertyListCellRender extends DefaultListCellRenderer {
                 break;
             case DELETED:
                 result.setBackground(new Color(255, 205, 197));
+                break;
+            case UNTRANSLATED:
+                result.setBackground(new Color(255, 249, 182));
                 break;
         }
         return result;

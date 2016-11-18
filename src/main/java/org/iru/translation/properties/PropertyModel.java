@@ -1,8 +1,9 @@
-package org.iru.translation.gui;
+package org.iru.translation.properties;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
+import org.iru.translation.gui.Action;
 
 public class PropertyModel extends DefaultListModel<PropertyModel.Property> {
     

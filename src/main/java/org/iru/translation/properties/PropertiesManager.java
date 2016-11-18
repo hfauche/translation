@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
-import org.iru.translation.gui.PropertyModel.Property;
+import org.iru.translation.properties.PropertyModel.Property;
 
 public class PropertiesManager {
     
@@ -30,9 +30,12 @@ public class PropertiesManager {
         Set<Object> insertedkeys = new HashSet<>(fromProps.size());
         fromProps.entrySet().stream()
             .forEach(p -> {
-                Object toEntry = toProps.get(p.getKey());
-                if (toEntry == null) {
-                    result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.DELETED));
+                String toValueAsString = (String)toProps.get(p.getKey());
+                final String fromValueAsString = (String)p.getValue();
+                if (toValueAsString == null) {
+                    result.add(new Property((String)p.getKey(), fromValueAsString, Action.DELETED));
+                } else if (fromValueAsString.trim().equalsIgnoreCase(toValueAsString.trim())) {
+                    result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.UNTRANSLATED));
                 } else if (!insertedkeys.contains(p.getKey())) {
                     insertedkeys.add(p.getKey());
                     result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.NONE));
@@ -43,9 +46,6 @@ public class PropertiesManager {
                 Object toEntry = fromProps.get(p.getKey());
                 if (toEntry == null) {
                     result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.ADDED));
-                } else if (!insertedkeys.contains(p.getKey())) {
-                    insertedkeys.add(p.getKey());
-                    result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.NONE));
                 }
             });
         Collections.sort(result);

@@ -4,6 +4,7 @@ public enum Action {
     
     NONE,
     DELETED,
-    ADDED;
+    ADDED,
+    UNTRANSLATED;
     
 }

@@ -1,5 +1,6 @@
 package org.iru.translation.gui;
 
+import org.iru.translation.properties.PropertyModel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
