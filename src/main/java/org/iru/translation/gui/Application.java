@@ -141,8 +141,8 @@ public class Application extends JPanel implements ActionListener {
         frame.setJMenuBar(toolbar);
 
         frame.setSize(700, 500);
-        frame.setVisible(true);
         frame.setLocationRelativeTo(null);//center
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) {
