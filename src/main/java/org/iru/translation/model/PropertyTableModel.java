@@ -10,7 +10,7 @@ import org.iru.translation.gui.Action;
 public class PropertyTableModel extends AbstractTableModel {
     
     private List<Property> list = new ArrayList<>(0);
-    private List<Property> filteredlist = new LinkedList<>();
+    private List<Property> filteredlist = new ArrayList<>(0);
     private String fromFileName = "No FROM file selected";
     private String toFileName = "No TO file selected";
     private boolean filterDeleted = false;
@@ -22,8 +22,14 @@ public class PropertyTableModel extends AbstractTableModel {
     
     public void setModel(List<Property> list) {
         this.list = list;
-        this.filteredlist = new LinkedList<>(list);
-        fireTableDataChanged();
+        doFilter();
+    }
+    
+    public void setModel(List<Property> list, String fromFileName, String toFileName) {
+        this.list = list;
+        this.fromFileName = fromFileName;
+        this.toFileName = toFileName;
+        doFilter();
     }
     
     public void setModel(List<Property> list, String fromFileName) {
@@ -35,11 +41,6 @@ public class PropertyTableModel extends AbstractTableModel {
     
     public Property getModel(int row) {
         return filteredlist.get(row);
-    }
-    
-    public void setToFileName(String toFileName) {
-        this.toFileName = toFileName;
-        fireTableStructureChanged();
     }
     
     @Override

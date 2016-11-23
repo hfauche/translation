@@ -35,6 +35,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JPanel mainPanel = new JPanel(new BorderLayout());
     private final JButton fromOpenButton = new JButton("Choose from file");
     private final JButton toOpenButton = new JButton("Choose to file");
+    private final JButton reloadButton = new JButton("Reload");
     private final JPanel files = new JPanel(new FlowLayout(FlowLayout.LEFT));
     private final JLabel filesLabel = new JLabel("Files to compare: ");
     private final JLabel filesBetweenLabel = new JLabel(" <==> ");
@@ -54,7 +55,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton filterDeletedButton = new JButton("Show deleted");
     private final JButton filterAddedButton = new JButton("Show added");
     private final JButton filterUntranslatedButton = new JButton("Show untranslated");
-    private Properties toProps, fromProps;
+    private File fromFile, toFile;
 
     public Application() {
         //Create and set up the window.
@@ -68,15 +69,16 @@ public class Application extends JFrame implements ActionListener, Colors {
 
         fromOpenButton.addActionListener(this);
         toOpenButton.addActionListener(this);
+        reloadButton.addActionListener(this);
         filterDeletedButton.addActionListener(this);
         filterAddedButton.addActionListener(this);
         filterUntranslatedButton.addActionListener(this);
         
-        filterDeletedButton.setBackground(Color.LIGHT_GRAY);
+        reloadButton.setEnabled(false);
+        
+        resetFilters();
         filterDeletedButton.setEnabled(false);
-        filterAddedButton.setBackground(Color.LIGHT_GRAY);
         filterAddedButton.setEnabled(false);
-        filterUntranslatedButton.setBackground(Color.LIGHT_GRAY);
         filterUntranslatedButton.setEnabled(false);
 
         add(jScrollPane, BorderLayout.CENTER);
@@ -88,6 +90,12 @@ public class Application extends JFrame implements ActionListener, Colors {
         addFilesPanel();
         addToolbar();
         addCopyCapability();
+    }
+
+    private void resetFilters() {
+        filterDeletedButton.setBackground(Color.LIGHT_GRAY);
+        filterAddedButton.setBackground(Color.LIGHT_GRAY);
+        filterUntranslatedButton.setBackground(Color.LIGHT_GRAY);
     }
 
     private void addLegendPanel() {
@@ -135,6 +143,7 @@ public class Application extends JFrame implements ActionListener, Colors {
         toolbar.setPreferredSize(new Dimension(200, 40));
         toolbar.add(fromOpenButton);
         toolbar.add(toOpenButton);
+        toolbar.add(reloadButton);
         toolbar.add(filterDeletedButton);
         toolbar.add(filterAddedButton);
         toolbar.add(filterUntranslatedButton);
@@ -159,10 +168,11 @@ public class Application extends JFrame implements ActionListener, Colors {
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == fromOpenButton) {
             int returnVal = fc.showOpenDialog(Application.this);
-
             if (returnVal == JFileChooser.APPROVE_OPTION) {
+                Properties fromProps = null;
                 File file = fc.getSelectedFile();
-                fromLabel.setText("" + fc.getName(file));
+                fromLabel.setText("" + file.getName());
+                fromFile = file;
                 try {
                     fromProps = propertiesManager.readProperties(file);
                 } catch (TranslationException ex) {
@@ -174,20 +184,32 @@ public class Application extends JFrame implements ActionListener, Colors {
         } else if (event.getSource() == toOpenButton) {
             int returnVal = fc.showSaveDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                toLabel.setText("" + fc.getName(file));
+                Properties fromProps = null, toProps = null;
+                toFile = fc.getSelectedFile();
+                toLabel.setText("" + toFile.getName());
                 try {
-                    toProps = propertiesManager.readProperties(file);
+                    fromProps = propertiesManager.readProperties(fromFile);
+                    toProps = propertiesManager.readProperties(toFile);
                 } catch (TranslationException ex) {
                     JOptionPane.showMessageDialog(this, ex);
                     return;
                 }
-                tableModel.setToFileName(file.getName());
-                tableModel.setModel(propertiesManager.diff(fromProps, toProps));
+                tableModel.setModel(propertiesManager.diff(fromProps, toProps), fromFile.getName(), toFile.getName());
                 filterDeletedButton.setEnabled(true);
                 filterAddedButton.setEnabled(true);
                 filterUntranslatedButton.setEnabled(true);
+                reloadButton.setEnabled(true);
             }
+        } else if (event.getSource() == reloadButton) {
+            Properties fromProps = null, toProps = null;
+            try {
+                fromProps = propertiesManager.readProperties(fromFile);
+                toProps = propertiesManager.readProperties(toFile);
+            } catch (TranslationException ex) {
+                JOptionPane.showMessageDialog(this, ex);
+                return;
+            }
+            tableModel.setModel(propertiesManager.diff(fromProps, toProps));
         } else if (event.getSource() == filterDeletedButton) {
             tableModel.toggleFilterDeleted();
             filterDeletedButton.setBackground(tableModel.isFilterDeleted() ? DELETED_COLOR : Color.LIGHT_GRAY);
