@@ -3,6 +3,7 @@ package org.iru.translation.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,10 +18,17 @@ public class PropertiesManager {
     
     public Properties readProperties(File f) throws TranslationException {
         Properties p = new Properties();
+        FileInputStream fileInputStream = null;
+        InputStreamReader reader = null;
         try {
-            p.load(new FileInputStream(f));
+            fileInputStream = new FileInputStream(f);
+            reader = new InputStreamReader(fileInputStream, "UTF-8");
+            p.load(reader);
         } catch (IOException ex) {
             throw new TranslationException("Unable to parse file", ex);
+        } finally {
+            try {reader.close();} catch(Exception ex) {};
+            try {fileInputStream.close();} catch(Exception ex) {};
         }
         return p;
     }
