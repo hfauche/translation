@@ -1,4 +1,4 @@
-package org.iru.translation.properties;
+package org.iru.translation.model;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
-import org.iru.translation.properties.PropertyModel.Property;
+import org.iru.translation.model.PropertyTableModel.Property;
 
 public class PropertiesManager {
     
@@ -24,6 +24,16 @@ public class PropertiesManager {
         }
         return p;
     }
+    
+    public List<Property> loadProperties(Properties props) {
+        List<PropertyTableModel.Property> result = new LinkedList<>();
+        props.entrySet().stream()
+                .forEach(p -> {
+                    result.add(new PropertyTableModel.Property((String) p.getKey(), (String) p.getValue(), null, Action.NONE));
+                });
+        Collections.sort(result);
+        return result;
+    }
 
     public List<Property> diff(Properties fromProps, Properties toProps) {
         List<Property> result = new LinkedList<>();
@@ -33,19 +43,19 @@ public class PropertiesManager {
                 String toValueAsString = (String)toProps.get(p.getKey());
                 final String fromValueAsString = (String)p.getValue();
                 if (toValueAsString == null) {
-                    result.add(new Property((String)p.getKey(), fromValueAsString, Action.DELETED));
+                    result.add(new Property((String)p.getKey(), fromValueAsString, null, Action.DELETED));
                 } else if (fromValueAsString.trim().equalsIgnoreCase(toValueAsString.trim())) {
-                    result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.UNTRANSLATED));
+                    result.add(new Property((String)p.getKey(), (String)p.getValue(), toValueAsString, Action.UNTRANSLATED));
                 } else if (!insertedkeys.contains(p.getKey())) {
                     insertedkeys.add(p.getKey());
-                    result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.NONE));
+                    result.add(new Property((String)p.getKey(), fromValueAsString, toValueAsString, Action.NONE));
                 }
             });
         toProps.entrySet().stream()
             .forEach(p -> {
-                Object toEntry = fromProps.get(p.getKey());
-                if (toEntry == null) {
-                    result.add(new Property((String)p.getKey(), (String)p.getValue(), Action.ADDED));
+                String fromValueAsString = (String)fromProps.get(p.getKey());
+                if (fromValueAsString == null) {
+                    result.add(new Property((String)p.getKey(), null, (String)p.getValue(), Action.ADDED));
                 }
             });
         Collections.sort(result);
