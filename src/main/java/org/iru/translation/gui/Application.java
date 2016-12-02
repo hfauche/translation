@@ -13,7 +13,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -230,6 +234,12 @@ public class Application extends JFrame implements ActionListener, Colors {
         JFrame frame = new Application();
         frame.setSize(700, 500);
         frame.setLocationRelativeTo(null);//center
+        try {
+            frame.setIconImage(ImageIO.read(frame.getClass().getResourceAsStream("/magician-rabbit-128.png")));
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(frame, ex);
+            System.exit(0);
+        }
         frame.setVisible(true);
     }
 
