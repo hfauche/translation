@@ -12,11 +12,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import org.iru.translation.PreferencesManager;
 import org.iru.translation.TranslationException;
 import org.iru.translation.model.PropertiesManager;
 import org.iru.translation.model.PropertyTableModel;
@@ -60,8 +61,11 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton filterAddedButton = new JButton("Show added");
     private final JButton filterUntranslatedButton = new JButton("Show untranslated");
     private File fromFile, toFile;
+    private PreferencesManager preferencesManager;
 
-    public Application() {
+    private Application(PreferencesManager preferencesManager) {
+        this.preferencesManager = preferencesManager;
+        
         //Create and set up the window.
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Translation tool");
@@ -94,6 +98,13 @@ public class Application extends JFrame implements ActionListener, Colors {
         addFilesPanel();
         addToolbar();
         addCopyCapability();
+        
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent winEvt) {
+                onExit();
+            }
+        });
     }
 
     private void resetFilters() {
@@ -171,9 +182,13 @@ public class Application extends JFrame implements ActionListener, Colors {
     @Override
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == fromOpenButton) {
+            final String prefFileDirectory = preferencesManager.getPreference(PreferencesManager.FILES_DIRECTORY);
+            if (prefFileDirectory != null) {
+                fc.setCurrentDirectory(new File(prefFileDirectory));
+            }
             int returnVal = fc.showOpenDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Properties fromProps = null;
+                Properties fromProps;
                 File file = fc.getSelectedFile();
                 fromLabel.setText("" + file.getName());
                 fromFile = file;
@@ -184,11 +199,16 @@ public class Application extends JFrame implements ActionListener, Colors {
                     return;
                 }
                 tableModel.setModel(propertiesManager.loadProperties(fromProps), file.getName());
+                preferencesManager.setPreference(PreferencesManager.FILES_DIRECTORY, file.getParent());
             }
         } else if (event.getSource() == toOpenButton) {
+            final String prefFileDirectory = preferencesManager.getPreference(PreferencesManager.FILES_DIRECTORY);
+            if (prefFileDirectory != null) {
+                fc.setCurrentDirectory(new File(prefFileDirectory));
+            }
             int returnVal = fc.showSaveDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Properties fromProps = null, toProps = null;
+                Properties fromProps, toProps;
                 toFile = fc.getSelectedFile();
                 toLabel.setText("" + toFile.getName());
                 try {
@@ -205,7 +225,7 @@ public class Application extends JFrame implements ActionListener, Colors {
                 reloadButton.setEnabled(true);
             }
         } else if (event.getSource() == reloadButton) {
-            Properties fromProps = null, toProps = null;
+            Properties fromProps, toProps;
             try {
                 fromProps = propertiesManager.readProperties(fromFile);
                 toProps = propertiesManager.readProperties(toFile);
@@ -225,13 +245,19 @@ public class Application extends JFrame implements ActionListener, Colors {
             filterUntranslatedButton.setBackground(tableModel.isFilterUnstranslated()? UNTRANSLATED_COLOR : Color.LIGHT_GRAY);
         }
     }
-
+    
+    private void onExit() {
+        try {
+            preferencesManager.savePreferences();
+        } catch (TranslationException ex) {}
+    }
+    
     /**
      * Create the GUI and show it. For thread safety, this method should be
      * invoked from the event-dispatching thread.
      */
-    private static void createAndShowGUI() {
-        JFrame frame = new Application();
+    private static void createAndShowGUI(PreferencesManager pm) {
+        Application frame = new Application(pm);
         frame.setSize(700, 500);
         frame.setLocationRelativeTo(null);//center
         try {
@@ -242,13 +268,20 @@ public class Application extends JFrame implements ActionListener, Colors {
         }
         frame.setVisible(true);
     }
-
+    
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                createAndShowGUI();
+                PreferencesManager pm = new PreferencesManager();
+                try {
+                    pm.loadPreferences();
+                } catch (TranslationException ex) {
+                    JOptionPane.showMessageDialog(null, "Unable to load preferences");
+                    System.exit(0);
+                }
+                createAndShowGUI(pm);
             }
         });
     }
