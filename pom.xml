@@ -15,12 +15,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>2.6</version>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <mainClass>org.iru.translation.gui.Application</mainClass>
-                        </manifest>
+                        <manifestEntries>
+                            <Main-Class>org.iru.translation.gui.Application</Main-Class>
+                            <SplashScreen-Image>splash.png</SplashScreen-Image>
+                        </manifestEntries>
                     </archive>
                     <finalName>translations</finalName>                   
                 </configuration>
