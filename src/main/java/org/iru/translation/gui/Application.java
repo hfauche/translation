@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.SplashScreen;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -259,7 +260,7 @@ public class Application extends JFrame implements ActionListener, Colors {
      */
     private static void createAndShowGUI(PreferencesManager pm) {
         Application frame = new Application(pm);
-        frame.setSize(700, 500);
+        frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);//center
         try {
             frame.setIconImage(ImageIO.read(frame.getClass().getResourceAsStream("/magician-rabbit-128.png")));
