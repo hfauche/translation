@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import org.iru.translation.PreferencesException;
 import org.iru.translation.PreferencesManager;
 import org.iru.translation.TranslationException;
 import org.iru.translation.model.PropertiesManager;
@@ -61,7 +62,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton filterAddedButton = new JButton("Show added");
     private final JButton filterUntranslatedButton = new JButton("Show untranslated");
     private File fromFile, toFile;
-    private PreferencesManager preferencesManager;
+    private final PreferencesManager preferencesManager;
 
     private Application(PreferencesManager preferencesManager) {
         this.preferencesManager = preferencesManager;
@@ -249,7 +250,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private void onExit() {
         try {
             preferencesManager.savePreferences();
-        } catch (TranslationException ex) {}
+        } catch (PreferencesException ex) {}
     }
     
     /**
@@ -272,17 +273,15 @@ public class Application extends JFrame implements ActionListener, Colors {
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                PreferencesManager pm = new PreferencesManager();
-                try {
-                    pm.loadPreferences();
-                } catch (TranslationException ex) {
-                    JOptionPane.showMessageDialog(null, "Unable to load preferences");
-                    System.exit(0);
-                }
-                createAndShowGUI(pm);
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            PreferencesManager pm = new PreferencesManager();
+            try {
+                pm.loadPreferences();
+            } catch (PreferencesException ex) {
+                JOptionPane.showMessageDialog(null, "Unable to load preferences");
+                System.exit(0);
             }
+            createAndShowGUI(pm);
         });
     }
 

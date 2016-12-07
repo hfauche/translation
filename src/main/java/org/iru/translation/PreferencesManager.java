@@ -12,24 +12,31 @@ public class PreferencesManager {
     PropertiesManager propertiesManager = new PropertiesManager();
     Properties applicationProperties;
     
-    public Properties loadPreferences() throws TranslationException {
+    public void loadPreferences() throws PreferencesException {
         File f = new File("translations-preferences.conf");
         if (!f.exists()) {
+            applicationProperties = new Properties();
+        } else {
             try {
-                f.createNewFile();
-            } catch (IOException ex) {
-                return new Properties();
+                applicationProperties = propertiesManager.readProperties(new File("translations-preferences.conf"));
+            } catch (TranslationException ex) {
+                throw new PreferencesException("Unable to load preferences", ex);
             }
         }
-        applicationProperties = propertiesManager.readProperties(new File("translations-preferences.conf"));
-        return applicationProperties;
     }
     
-    public void savePreferences() throws TranslationException {
+    public void savePreferences() throws PreferencesException {
+        File f = new File("translations-preferences.conf");
+        if (applicationProperties.isEmpty()) {
+            return;
+        }
         try {
-            applicationProperties.store(new FileOutputStream(new File("translations-preferences.conf")), "Translation Application Preferences");
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+            applicationProperties.store(new FileOutputStream(f), "Translation Application Preferences");
         } catch (IOException ex) {
-            throw new TranslationException("Unable to save preferences", ex);
+            throw new PreferencesException("Unable to save preferences", ex);
         }
     }
 
