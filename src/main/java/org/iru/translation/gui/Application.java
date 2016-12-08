@@ -40,8 +40,8 @@ import org.iru.translation.model.PropertyTableModel.Property;
 public class Application extends JFrame implements ActionListener, Colors {
 
     private final JPanel mainPanel = new JPanel(new BorderLayout());
-    private final JButton fromOpenButton = new JButton("Choose from file");
-    private final JButton toOpenButton = new JButton("Choose to file");
+    private final JButton fromOpenButton = new JButton("Choose FROM file");
+    private final JButton toOpenButton = new JButton("Choose TO file");
     private final JButton reloadButton = new JButton("Reload");
     private final JPanel files = new JPanel(new FlowLayout(FlowLayout.LEFT));
     private final JLabel filesLabel = new JLabel("Files to compare: ");
@@ -71,6 +71,7 @@ public class Application extends JFrame implements ActionListener, Colors {
         //Create and set up the window.
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Translation tool");
+        this.setBackground(MAIN_COLOR);
         table.setDefaultRenderer(Object.class, new PropertyCellRenderer());
 
         //Create and set up the content pane.
@@ -107,6 +108,8 @@ public class Application extends JFrame implements ActionListener, Colors {
                 onExit();
             }
         });
+        
+        
     }
 
     private void resetFilters() {
@@ -156,8 +159,7 @@ public class Application extends JFrame implements ActionListener, Colors {
 
     private void addToolbar() {
         JMenuBar toolbar = new JMenuBar();
-        toolbar.setOpaque(true);
-        toolbar.setPreferredSize(new Dimension(200, 40));
+        toolbar.setBackground(MAIN_COLOR);
         toolbar.add(fromOpenButton);
         toolbar.add(toOpenButton);
         toolbar.add(reloadButton);
