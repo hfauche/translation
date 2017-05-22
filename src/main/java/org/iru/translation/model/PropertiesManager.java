@@ -2,6 +2,7 @@ package org.iru.translation.model;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.iru.translation.PreferencesException;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
 import org.iru.translation.model.PropertyTableModel.Property;
@@ -68,5 +70,25 @@ public class PropertiesManager {
             });
         Collections.sort(result);
         return result;
+    }
+    
+    public void export(PropertyTableModel tableModel) throws PreferencesException {
+        String newLine = System.getProperty("line.separator");
+        File f = new File(System.getProperty("java.io.tmpdir") + "/translations-export.csv"); 
+        try (FileWriter fw = new FileWriter(f)) {
+            for (int i=0; i<tableModel.getRowCount(); i++) {
+                final Property prop = tableModel.getModel(i);
+                fw.append(prop.getKey()).append(';');
+                if (prop.getValueFrom() != null) {
+                    fw.append(prop.getValueFrom().replace("\n", "<LINEBREAK>")).append(';');
+                }
+                if (prop.getValueTo() != null) {
+                    fw.append(prop.getValueTo().replace("\n", "<LINEBREAK>")).append(';');
+                }
+                fw.append(newLine);
+            }
+        } catch(Exception ex) {
+            throw new PreferencesException("Impossible to export data", ex);
+        }
     }
 }

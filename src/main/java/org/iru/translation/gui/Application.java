@@ -2,10 +2,8 @@ package org.iru.translation.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.SplashScreen;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -43,6 +41,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton fromOpenButton = new JButton("Choose FROM file");
     private final JButton toOpenButton = new JButton("Choose TO file");
     private final JButton reloadButton = new JButton("Reload");
+    private final JButton exportButton = new JButton("Export");
     private final JPanel files = new JPanel(new FlowLayout(FlowLayout.LEFT));
     private final JLabel filesLabel = new JLabel("Files to compare: ");
     private final JLabel filesBetweenLabel = new JLabel(" <==> ");
@@ -81,6 +80,7 @@ public class Application extends JFrame implements ActionListener, Colors {
         fromOpenButton.addActionListener(this);
         toOpenButton.addActionListener(this);
         reloadButton.addActionListener(this);
+        exportButton.addActionListener(this);
         filterDeletedButton.addActionListener(this);
         filterAddedButton.addActionListener(this);
         filterUntranslatedButton.addActionListener(this);
@@ -163,6 +163,7 @@ public class Application extends JFrame implements ActionListener, Colors {
         toolbar.add(fromOpenButton);
         toolbar.add(toOpenButton);
         toolbar.add(reloadButton);
+        toolbar.add(exportButton);
         toolbar.add(filterDeletedButton);
         toolbar.add(filterAddedButton);
         toolbar.add(filterUntranslatedButton);
@@ -247,6 +248,13 @@ public class Application extends JFrame implements ActionListener, Colors {
         } else if (event.getSource() == filterUntranslatedButton) {
             tableModel.toggleFilterUntranslated();
             filterUntranslatedButton.setBackground(tableModel.isFilterUnstranslated()? UNTRANSLATED_COLOR : Color.LIGHT_GRAY);
+        } else if (event.getSource() == exportButton) {
+            try {
+                propertiesManager.export(tableModel);
+            } catch (TranslationException ex) {
+                JOptionPane.showMessageDialog(this, ex);
+                return;
+            }
         }
     }
     
