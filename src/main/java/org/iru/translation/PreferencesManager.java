@@ -9,16 +9,21 @@ import org.iru.translation.model.PropertiesManager;
 public class PreferencesManager {
     public final static String FILES_DIRECTORY = "files.directory";
     
-    PropertiesManager propertiesManager = new PropertiesManager();
-    Properties applicationProperties;
+    private final PropertiesManager propertiesManager;
+    private Properties applicationProperties;
+    private final String preferencesFileLocation = System.getProperty("user.home") + "/translations-preferences.conf";
+
+    public PreferencesManager(PropertiesManager propertiesManager) {
+        this.propertiesManager = propertiesManager;
+    }
     
     public void loadPreferences() throws PreferencesException {
-        File f = new File("translations-preferences.conf");
+        File f = new File(preferencesFileLocation);
         if (!f.exists()) {
             applicationProperties = new Properties();
         } else {
             try {
-                applicationProperties = propertiesManager.readProperties(new File("translations-preferences.conf"));
+                applicationProperties = propertiesManager.readProperties(new File(preferencesFileLocation));
             } catch (TranslationException ex) {
                 throw new PreferencesException("Unable to load preferences", ex);
             }
@@ -26,7 +31,7 @@ public class PreferencesManager {
     }
     
     public void savePreferences() throws PreferencesException {
-        File f = new File("translations-preferences.conf");
+        File f = new File(preferencesFileLocation);
         if (applicationProperties.isEmpty()) {
             return;
         }

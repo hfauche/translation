@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.PreferencesManager;
 import org.iru.translation.TranslationException;
@@ -48,7 +49,6 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JLabel fromLabel = new JLabel("?");
     private final JLabel toLabel = new JLabel("?");
     private final JFileChooser fc = new JFileChooser();
-    private final PropertiesManager propertiesManager = new PropertiesManager();
     private final PropertyTableModel tableModel = new PropertyTableModel();
     private final JTable table = new JTable(tableModel);
     private final JScrollPane jScrollPane = new JScrollPane(table);
@@ -63,9 +63,11 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton filterUntranslatedButton = new JButton("Show untranslated");
     private File fromFile, toFile;
     private final PreferencesManager preferencesManager;
+    private final PropertiesManager propertiesManager;
 
-    private Application(PreferencesManager preferencesManager) {
+    private Application(PreferencesManager preferencesManager, PropertiesManager propertiesManager) {
         this.preferencesManager = preferencesManager;
+        this.propertiesManager = propertiesManager;
         
         //Create and set up the window.
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -268,8 +270,8 @@ public class Application extends JFrame implements ActionListener, Colors {
      * Create the GUI and show it. For thread safety, this method should be
      * invoked from the event-dispatching thread.
      */
-    private static void createAndShowGUI(PreferencesManager pm) {
-        Application frame = new Application(pm);
+    private static void createAndShowGUI(PreferencesManager preferencesManager, PropertiesManager propertiesManager) {
+        Application frame = new Application(preferencesManager, propertiesManager);
         frame.setSize(880, 600);
         frame.setLocationRelativeTo(null);//center
         try {
@@ -285,14 +287,17 @@ public class Application extends JFrame implements ActionListener, Colors {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(() -> {
-            PreferencesManager pm = new PreferencesManager();
+            DictionnaryManager dictionnaryManager = new DictionnaryManager();
+            final PropertiesManager propertiesManager = new PropertiesManager(dictionnaryManager);
+            PreferencesManager preferencesManager = new PreferencesManager(propertiesManager);
             try {
-                pm.loadPreferences();
+                preferencesManager.loadPreferences();
+                dictionnaryManager.loadDictionnary();
             } catch (PreferencesException ex) {
                 JOptionPane.showMessageDialog(null, "Unable to load preferences");
                 System.exit(0);
             }
-            createAndShowGUI(pm);
+            createAndShowGUI(preferencesManager, propertiesManager);
         });
     }
 
