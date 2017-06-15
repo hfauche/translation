@@ -270,7 +270,7 @@ public class Application extends JFrame implements ActionListener, Colors {
      */
     private static void createAndShowGUI(PreferencesManager pm) {
         Application frame = new Application(pm);
-        frame.setSize(800, 600);
+        frame.setSize(880, 600);
         frame.setLocationRelativeTo(null);//center
         try {
             frame.setIconImage(ImageIO.read(frame.getClass().getResourceAsStream("/magician-rabbit-128.png")));
