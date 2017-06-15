@@ -29,6 +29,7 @@ public class PropertyTableModel extends AbstractTableModel {
         this.list = list;
         this.fromFileName = fromFileName;
         this.toFileName = toFileName;
+        fireTableStructureChanged();
         doFilter();
     }
     
