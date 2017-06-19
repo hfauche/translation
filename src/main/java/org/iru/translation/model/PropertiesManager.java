@@ -37,6 +37,7 @@ public class PropertiesManager {
                 = new FileBasedConfigurationBuilder(PropertiesConfiguration.class)
                     .configure(new Parameters().properties()
                         .setLocationStrategy(new ProvidedURLLocationStrategy())
+                        .setEncoding("UTF-8")
                         .setURL(f.toURI().toURL()));
             return builder;
         } catch (MalformedURLException ex) {
