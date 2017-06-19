@@ -23,9 +23,76 @@
                             <SplashScreen-Image>splash.png</SplashScreen-Image>
                         </manifestEntries>
                     </archive>
-                    <finalName>translations</finalName>                   
+                    <!--<finalName>translations</finalName>-->                   
                 </configuration>
             </plugin>    
+			<plugin>
+				<groupId>com.github.sampov2</groupId>
+				<artifactId>onejar-maven-plugin</artifactId>
+				<version>1.4.6</version>
+				<executions>
+					<execution>
+						<configuration>
+                            <filename>translation.jar</filename>
+                            <splashScreen>splash.png</splashScreen>
+						</configuration>
+						<goals>
+							<goal>one-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.1.1</version>
+            <exclusions>
+<!--                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>-->
+            </exclusions>
+        </dependency>        
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.3</version>
+            <exclusions>
+<!--                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>-->
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>        
+<!--        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>-->
+    </dependencies>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>com.github.sampov2.onejar-maven-plugin</id>
+            <url>http://maven.codeforcode.com/repository</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

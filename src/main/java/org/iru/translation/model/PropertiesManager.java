@@ -1,22 +1,27 @@
 package org.iru.translation.model;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.io.ProvidedURLLocationStrategy;
 import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
-import org.iru.translation.model.PropertyTableModel.Property;
 
 public class PropertiesManager {
     
@@ -26,48 +31,50 @@ public class PropertiesManager {
         this.dictionnaryManager = dictionnaryManager;
     }
     
-    public Properties readProperties(File f) throws TranslationException {
-        Properties p = new Properties();
-        try(FileReader reader = new FileReader(f)) {
-            p.load(reader);
-        } catch (IOException ex) {
-            throw new TranslationException("Unable to parse file", ex);
+    public FileBasedConfigurationBuilder getPropertiesBuilder(File f) throws TranslationException {
+        try {
+            FileBasedConfigurationBuilder builder
+                = new FileBasedConfigurationBuilder(PropertiesConfiguration.class)
+                    .configure(new Parameters().properties()
+                        .setLocationStrategy(new ProvidedURLLocationStrategy())
+                        .setURL(f.toURI().toURL()));
+            return builder;
+        } catch (MalformedURLException ex) {
+            throw new TranslationException("unable to get URL for file", ex);
         }
-        return p;
     }
     
-    public List<Property> loadProperties(Properties props) {
-        return props.entrySet()
-            .stream()
-            .filter(p -> !dictionnaryManager.isInDictionnary((String) p.getValue()))
-            .sorted((p1,p2) -> {return p1.getKey().toString().compareToIgnoreCase(p2.getKey().toString());})
-            .map(p -> new PropertyTableModel.Property((String) p.getKey(), (String) p.getValue(), null, Action.NONE))
+    public List<Property> loadProperties(Configuration props) {
+        return Stream.generate(props.getKeys()::next).limit(props.size())
+            .filter(k -> !dictionnaryManager.isInDictionnary(props.getString(k)))
+            .sorted(Comparator.naturalOrder())
+            .map(k -> new Property(k, props.getString(k), null, Action.NONE))
             .collect(Collectors.toList());
     }
 
-    public List<Property> diff(Properties fromProps, Properties toProps) {
+    public List<Property> diff(Configuration fromProps, Configuration toProps) {
         List<Property> result = new LinkedList<>();
         Set<Object> insertedkeys = new HashSet<>(fromProps.size());
-        fromProps.entrySet().stream()
-            .filter(p -> !dictionnaryManager.isInDictionnary((String) p.getValue()))
-            .forEach(p -> {
-                String toValueAsString = (String)toProps.get(p.getKey());
-                final String fromValueAsString = (String)p.getValue();
+        Stream.generate(fromProps.getKeys()::next).limit(fromProps.size())
+            .filter(k -> !dictionnaryManager.isInDictionnary(fromProps.getString(k)))
+            .forEach(k -> {
+                String toValueAsString = toProps.getString(k);
+                final String fromValueAsString = fromProps.getString(k);
                 if (toValueAsString == null) {
-                    result.add(new Property((String)p.getKey(), fromValueAsString, null, Action.DELETED));
+                    result.add(new Property(k, fromValueAsString, null, Action.DELETED));
                 } else if (fromValueAsString.trim().equalsIgnoreCase(toValueAsString.trim())) {
-                    result.add(new Property((String)p.getKey(), (String)p.getValue(), toValueAsString, Action.UNTRANSLATED));
-                } else if (!insertedkeys.contains(p.getKey())) {
-                    insertedkeys.add(p.getKey());
-                    result.add(new Property((String)p.getKey(), fromValueAsString, toValueAsString, Action.NONE));
+                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.UNTRANSLATED));
+                } else if (!insertedkeys.contains(k)) {
+                    insertedkeys.add(k);
+                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE));
                 }
             });
-        toProps.entrySet().stream()
-            .filter(p -> !dictionnaryManager.isInDictionnary((String) p.getValue()))
-            .forEach(p -> {
-                String fromValueAsString = (String)fromProps.get(p.getKey());
+        Stream.generate(toProps.getKeys()::next).limit(toProps.size())
+            .filter(k -> !dictionnaryManager.isInDictionnary(toProps.getString(k)))
+            .forEach(k -> {
+                String fromValueAsString = fromProps.getString(k);
                 if (fromValueAsString == null) {
-                    result.add(new Property((String)p.getKey(), null, (String)p.getValue(), Action.ADDED));
+                    result.add(new Property(k, null, toProps.getString(k), Action.ADDED));
                 }
             });
         Collections.sort(result);

@@ -15,7 +15,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -28,13 +27,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.FileBasedConfiguration;
+import org.apache.commons.configuration2.builder.ConfigurationBuilder;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.PreferencesManager;
 import org.iru.translation.TranslationException;
 import org.iru.translation.model.PropertiesManager;
+import org.iru.translation.model.Property;
 import org.iru.translation.model.PropertyTableModel;
-import org.iru.translation.model.PropertyTableModel.Property;
 
 public class Application extends JFrame implements ActionListener, Colors {
 
@@ -62,6 +65,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton filterAddedButton = new JButton("Show added");
     private final JButton filterUntranslatedButton = new JButton("Show untranslated");
     private File fromFile, toFile;
+    private ConfigurationBuilder<FileBasedConfiguration> fromBuilder, toBuilder;
     private final PreferencesManager preferencesManager;
     private final PropertiesManager propertiesManager;
 
@@ -195,13 +199,14 @@ public class Application extends JFrame implements ActionListener, Colors {
             }
             int returnVal = fc.showOpenDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Properties fromProps;
+                Configuration fromProps;
                 File file = fc.getSelectedFile();
                 fromLabel.setText("" + file.getName());
                 fromFile = file;
                 try {
-                    fromProps = propertiesManager.readProperties(file);
-                } catch (TranslationException ex) {
+                    fromBuilder =  propertiesManager.getPropertiesBuilder(file);
+                    fromProps = fromBuilder.getConfiguration();
+                } catch (ConfigurationException | TranslationException ex) {
                     JOptionPane.showMessageDialog(this, ex);
                     return;
                 }
@@ -215,13 +220,14 @@ public class Application extends JFrame implements ActionListener, Colors {
             }
             int returnVal = fc.showSaveDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Properties fromProps, toProps;
+                Configuration fromProps, toProps;
                 toFile = fc.getSelectedFile();
                 toLabel.setText("" + toFile.getName());
                 try {
-                    fromProps = propertiesManager.readProperties(fromFile);
-                    toProps = propertiesManager.readProperties(toFile);
-                } catch (TranslationException ex) {
+                    fromProps = fromBuilder.getConfiguration();
+                    toBuilder = propertiesManager.getPropertiesBuilder(toFile);
+                    toProps = toBuilder.getConfiguration();
+                } catch (ConfigurationException | TranslationException ex) {
                     JOptionPane.showMessageDialog(this, ex);
                     return;
                 }
@@ -232,11 +238,11 @@ public class Application extends JFrame implements ActionListener, Colors {
                 reloadButton.setEnabled(true);
             }
         } else if (event.getSource() == reloadButton) {
-            Properties fromProps, toProps;
+            Configuration fromProps, toProps;
             try {
-                fromProps = propertiesManager.readProperties(fromFile);
-                toProps = propertiesManager.readProperties(toFile);
-            } catch (TranslationException ex) {
+                fromProps = fromBuilder.getConfiguration();
+                toProps = toBuilder.getConfiguration();
+            } catch (ConfigurationException ex) {
                 JOptionPane.showMessageDialog(this, ex);
                 return;
             }

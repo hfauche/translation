@@ -10,8 +10,8 @@ import static org.iru.translation.gui.Action.UNTRANSLATED;
 import static org.iru.translation.gui.Colors.ADDED_COLOR;
 import static org.iru.translation.gui.Colors.DELETED_COLOR;
 import static org.iru.translation.gui.Colors.UNTRANSLATED_COLOR;
+import org.iru.translation.model.Property;
 import org.iru.translation.model.PropertyTableModel;
-import org.iru.translation.model.PropertyTableModel.Property;
 
 public class PropertyCellRenderer extends DefaultTableCellRenderer {
     
