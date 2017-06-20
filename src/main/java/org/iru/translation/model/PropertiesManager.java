@@ -1,5 +1,6 @@
 package org.iru.translation.model;
 
+import org.iru.translation.io.ConfigurationUpdater;
 import java.io.File;
 import java.io.FileWriter;
 import java.net.MalformedURLException;
@@ -22,6 +23,7 @@ import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
+import org.iru.translation.io.LineBreakIOFactory;
 
 public class PropertiesManager {
     
@@ -38,6 +40,7 @@ public class PropertiesManager {
                     .configure(new Parameters().properties()
                         .setLocationStrategy(new ProvidedURLLocationStrategy())
                         .setEncoding("UTF-8")
+                        .setIOFactory(new LineBreakIOFactory())
                         .setURL(f.toURI().toURL()));
             return builder;
         } catch (MalformedURLException ex) {
@@ -53,7 +56,7 @@ public class PropertiesManager {
             .collect(Collectors.toList());
     }
 
-    public List<Property> diff(Configuration fromProps, Configuration toProps) {
+    public List<Property> diff(Configuration fromProps, Configuration toProps, ConfigurationUpdater updater) {
         List<Property> result = new LinkedList<>();
         Set<Object> insertedkeys = new HashSet<>(fromProps.size());
         Stream.generate(fromProps.getKeys()::next).limit(fromProps.size())
@@ -64,10 +67,10 @@ public class PropertiesManager {
                 if (toValueAsString == null) {
                     result.add(new Property(k, fromValueAsString, null, Action.DELETED));
                 } else if (fromValueAsString.trim().equalsIgnoreCase(toValueAsString.trim())) {
-                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.UNTRANSLATED));
+                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.UNTRANSLATED, updater));
                 } else if (!insertedkeys.contains(k)) {
                     insertedkeys.add(k);
-                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE));
+                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE, updater));
                 }
             });
         Stream.generate(toProps.getKeys()::next).limit(toProps.size())

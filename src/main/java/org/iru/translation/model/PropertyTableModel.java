@@ -88,6 +88,18 @@ public class PropertyTableModel extends AbstractTableModel {
         return result;
     }
 
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (columnIndex == 2) {
+            filteredlist.get(rowIndex).setValueTo((String)aValue);
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex == 2;
+    }
+    
     public void toggleFilterDeleted() {
         filterDeleted = !filterDeleted;
         doFilter();
