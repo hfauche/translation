@@ -10,8 +10,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.configuration2.Configuration;
@@ -23,6 +21,7 @@ import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
+import org.iru.translation.io.EpdPropertiesConfigurationLayout;
 import org.iru.translation.io.LineBreakIOFactory;
 
 public class PropertiesManager {
@@ -39,6 +38,7 @@ public class PropertiesManager {
                 = new FileBasedConfigurationBuilder(PropertiesConfiguration.class)
                     .configure(new Parameters().properties()
                         .setLocationStrategy(new ProvidedURLLocationStrategy())
+                        .setLayout(new EpdPropertiesConfigurationLayout())
                         .setEncoding("UTF-8")
                         .setIOFactory(new LineBreakIOFactory())
                         .setURL(f.toURI().toURL()));
@@ -65,12 +65,12 @@ public class PropertiesManager {
                 String toValueAsString = toProps.getString(k);
                 final String fromValueAsString = fromProps.getString(k);
                 if (toValueAsString == null) {
-                    result.add(new Property(k, fromValueAsString, null, Action.DELETED));
+                    result.add(new Property(k, fromValueAsString, null, Action.DELETED, updater));
                 } else if (fromValueAsString.trim().equalsIgnoreCase(toValueAsString.trim())) {
                     result.add(new Property(k, fromValueAsString, toValueAsString, Action.UNTRANSLATED, updater));
                 } else if (!insertedkeys.contains(k)) {
                     insertedkeys.add(k);
-                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE, updater));
+                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE));
                 }
             });
         Stream.generate(toProps.getKeys()::next).limit(toProps.size())
@@ -78,7 +78,7 @@ public class PropertiesManager {
             .forEach(k -> {
                 String fromValueAsString = fromProps.getString(k);
                 if (fromValueAsString == null) {
-                    result.add(new Property(k, null, toProps.getString(k), Action.ADDED));
+                    result.add(new Property(k, null, toProps.getString(k), Action.ADDED, updater));
                 }
             });
         Collections.sort(result);

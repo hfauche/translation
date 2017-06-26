@@ -2,12 +2,13 @@ package org.iru.translation.model;
 
 import org.iru.translation.io.PropertyChangeListener;
 import org.iru.translation.gui.Action;
+import org.iru.translation.io.PropertyChangeListenerAble;
 
-public class Property implements Comparable<Property> {
+public class Property implements Comparable<Property>, PropertyChangeListenerAble {
     private final String key;
     private final String valueFrom;
     private String valueTo;
-    private final Action action;
+    private Action action;
     private PropertyChangeListener listener;
 
     public Property(String key, String valueFrom, String valueTo, Action action, PropertyChangeListener listener) {
@@ -25,6 +26,7 @@ public class Property implements Comparable<Property> {
         this.action = action;
     }
     
+    @Override
     public String getKey() {
         return key;
     }
@@ -33,6 +35,7 @@ public class Property implements Comparable<Property> {
         return valueFrom;
     }
 
+    @Override
     public String getValueTo() {
         return valueTo;
     }
@@ -41,10 +44,14 @@ public class Property implements Comparable<Property> {
         return action;
     }
     
+    public void setAction(Action action) {
+        this.action = action;
+    }
+    
     void setValueTo(String value) {
         this.valueTo = value;
         if (listener != null) {
-            listener.notifyvalueCĥange(this);
+            listener.notifyPropertyValueCĥange(this);
         }
     }
 

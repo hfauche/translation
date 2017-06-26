@@ -1,7 +1,7 @@
 package org.iru.translation.io;
 
 import org.apache.commons.configuration2.Configuration;
-import org.iru.translation.model.Property;
+import org.apache.commons.lang3.StringUtils;
 
 public class ConfigurationUpdater implements PropertyChangeListener {
     
@@ -12,8 +12,9 @@ public class ConfigurationUpdater implements PropertyChangeListener {
     }
     
     @Override
-    public void notifyvalueCĥange(Property p) {
-        configuration.setProperty(p.getKey(), p.getValueTo());
+    public void notifyPropertyValueCĥange(PropertyChangeListenerAble p) {
+        //set to null if blank to trigger a delete of the property
+        configuration.setProperty(p.getKey(), StringUtils.defaultIfBlank(p.getValueTo(), null));
     }
 
 }
