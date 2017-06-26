@@ -46,7 +46,8 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton fromOpenButton = new JButton("Choose FROM file");
     private final JButton toOpenButton = new JButton("Choose TO file");
     private final JButton reloadButton = new JButton("Reload");
-    private final JButton exportButton = new JButton("Export");
+    private final JButton exportButton = new JButton("Export");    
+    private final JButton importButton = new JButton("Import");
     private final JButton saveButton = new JButton("Save");
     private final JPanel files = new JPanel(new FlowLayout(FlowLayout.LEFT));
     private final JLabel filesLabel = new JLabel("Files to compare: ");
@@ -90,6 +91,7 @@ public class Application extends JFrame implements ActionListener, Colors {
         toOpenButton.addActionListener(this);
         reloadButton.addActionListener(this);
         exportButton.addActionListener(this);
+        importButton.addActionListener(this);
         saveButton.addActionListener(this);
         filterDeletedButton.addActionListener(this);
         filterAddedButton.addActionListener(this);
@@ -97,6 +99,8 @@ public class Application extends JFrame implements ActionListener, Colors {
         
         reloadButton.setEnabled(false);
         saveButton.setEnabled(false);
+        exportButton.setEnabled(false);
+        importButton.setEnabled(false);
         
         resetFilters();
         filterDeletedButton.setEnabled(false);
@@ -110,7 +114,7 @@ public class Application extends JFrame implements ActionListener, Colors {
 
         addLegendPanel();
         addFilesPanel();
-        addToolbar();
+        addToolbars();
         addCopyCapability();
         
         this.addWindowListener(new WindowAdapter() {
@@ -167,18 +171,31 @@ public class Application extends JFrame implements ActionListener, Colors {
         northPanel.add(files, BorderLayout.NORTH);
     }
 
-    private void addToolbar() {
-        JMenuBar toolbar = new JMenuBar();
-        toolbar.setBackground(MAIN_COLOR);
-        toolbar.add(fromOpenButton);
-        toolbar.add(toOpenButton);
-        toolbar.add(reloadButton);
-        toolbar.add(exportButton);
-        toolbar.add(saveButton);
-        toolbar.add(filterDeletedButton);
-        toolbar.add(filterAddedButton);
-        toolbar.add(filterUntranslatedButton);
-        setJMenuBar(toolbar);
+    private void addToolbars() {
+        JPanel actionToolbar = new JPanel();
+        actionToolbar.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        actionToolbar.setBackground(MAIN_COLOR);
+        actionToolbar.add(fromOpenButton);
+        actionToolbar.add(toOpenButton);
+        actionToolbar.add(reloadButton);
+        actionToolbar.add(exportButton);
+        actionToolbar.add(importButton);
+        actionToolbar.add(saveButton);
+        JPanel filterToolbar = new JPanel();
+        filterToolbar.setBackground(MAIN_COLOR);
+        filterToolbar.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        filterToolbar.add(filterDeletedButton);
+        filterToolbar.add(filterAddedButton);
+        filterToolbar.add(filterUntranslatedButton);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(MAIN_COLOR);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.add(actionToolbar);
+        buttonPanel.add(filterToolbar);
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(MAIN_COLOR);
+        menuBar.add(buttonPanel);
+        setJMenuBar(menuBar);
     }
 
     private void addCopyCapability() {
@@ -241,6 +258,8 @@ public class Application extends JFrame implements ActionListener, Colors {
                 filterDeletedButton.setEnabled(true);
                 filterAddedButton.setEnabled(true);
                 filterUntranslatedButton.setEnabled(true);
+                exportButton.setEnabled(true);
+                importButton.setEnabled(true);
                 reloadButton.setEnabled(true);
                 saveButton.setEnabled(true);
             }
@@ -284,6 +303,19 @@ public class Application extends JFrame implements ActionListener, Colors {
             } catch (TranslationException ex) {
                 JOptionPane.showMessageDialog(this, ex);
                 return;
+            }
+        } else if (event.getSource() == importButton) {
+            int returnVal = fc.showOpenDialog(Application.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                try {
+                    propertiesManager.importFromCsv(toBuilder.getConfiguration(), fc.getSelectedFile());
+                    Configuration fromProps = fromBuilder.getConfiguration();
+                    Configuration toProps = toBuilder.getConfiguration();
+                    tableModel.setModel(propertiesManager.diff(fromProps, toProps, configurationUpdater));
+                } catch (TranslationException | ConfigurationException ex) {
+                    JOptionPane.showMessageDialog(this, ex);
+                    return;
+                }
             }
         }
     }

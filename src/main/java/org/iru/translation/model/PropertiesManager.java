@@ -2,13 +2,19 @@ package org.iru.translation.model;
 
 import org.iru.translation.io.ConfigurationUpdater;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,7 +24,6 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.io.ProvidedURLLocationStrategy;
 import org.iru.translation.DictionnaryManager;
-import org.iru.translation.PreferencesException;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
 import org.iru.translation.io.EpdPropertiesConfigurationLayout;
@@ -103,5 +108,33 @@ public class PropertiesManager {
         } catch(Exception ex) {
             throw new TranslationException("Impossible to export data", ex);
         }
+    }
+    
+    public void importFromCsv(Configuration toProps, File f) throws TranslationException {
+        final FileReader fileReader;
+        try {
+            fileReader = new FileReader(f);
+        } catch (FileNotFoundException ex) {
+            throw new TranslationException("File to import not found", ex);
+        }
+        LineNumberReader is = new LineNumberReader(fileReader);
+        Map<String, String> props = new HashMap<>();
+        try {
+            String line = is.readLine();
+            while (line != null) {
+                String[] prop = line.split(";");
+                if (prop.length != 2) {
+                    throw new TranslationException("Format error at line " + is.getLineNumber());
+                }
+                String key = prop[0];
+                String value = prop[1];
+                props.put(key, value);
+                line = is.readLine();
+            }
+        }
+        catch (IOException ex) {
+            throw new TranslationException("Error when reading CSV file", ex);
+        }
+        props.forEach((k, v) -> toProps.setProperty(k,v));
     }
 }
