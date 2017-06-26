@@ -74,7 +74,7 @@ public class PropertiesManager {
         return result;
     }
     
-    public void export(PropertyTableModel tableModel) throws PreferencesException {
+    public void export(PropertyTableModel tableModel) throws TranslationException {
         String newLine = System.getProperty("line.separator");
         File f = new File(System.getProperty("java.io.tmpdir") + "/translations-export.csv"); 
         try (FileWriter fw = new FileWriter(f)) {
@@ -90,7 +90,7 @@ public class PropertiesManager {
                 fw.append(newLine);
             }
         } catch(Exception ex) {
-            throw new PreferencesException("Impossible to export data", ex);
+            throw new TranslationException("Impossible to export data", ex);
         }
     }
 }
