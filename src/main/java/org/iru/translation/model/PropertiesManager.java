@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.iru.translation.DictionnaryManager;
-import org.iru.translation.PreferencesException;
 import org.iru.translation.TranslationException;
 import org.iru.translation.gui.Action;
 import org.iru.translation.model.PropertyTableModel.Property;
@@ -37,9 +35,8 @@ public class PropertiesManager {
     }
     
     public List<Property> loadProperties(Properties props) {
-        return props.entrySet()
-            .stream()
-            .filter(p -> !dictionnaryManager.isInDictionnary((String) p.getValue()))
+        return props.entrySet().stream()
+            .filter(e -> (!dictionnaryManager.isKeyInDictionnary((String)e.getKey()) && !dictionnaryManager.isValueInDictionnary((String)e.getValue())))
             .sorted((p1,p2) -> {return p1.getKey().toString().compareToIgnoreCase(p2.getKey().toString());})
             .map(p -> new PropertyTableModel.Property((String) p.getKey(), (String) p.getValue(), null, Action.NONE))
             .collect(Collectors.toList());
@@ -49,7 +46,7 @@ public class PropertiesManager {
         List<Property> result = new LinkedList<>();
         Set<Object> insertedkeys = new HashSet<>(fromProps.size());
         fromProps.entrySet().stream()
-            .filter(p -> !dictionnaryManager.isInDictionnary((String) p.getValue()))
+            .filter(e -> (!dictionnaryManager.isKeyInDictionnary((String)e.getKey()) && !dictionnaryManager.isValueInDictionnary((String)e.getValue())))
             .forEach(p -> {
                 String toValueAsString = (String)toProps.get(p.getKey());
                 final String fromValueAsString = (String)p.getValue();
@@ -63,7 +60,7 @@ public class PropertiesManager {
                 }
             });
         toProps.entrySet().stream()
-            .filter(p -> !dictionnaryManager.isInDictionnary((String) p.getValue()))
+            .filter(e -> (!dictionnaryManager.isKeyInDictionnary((String)e.getKey()) && !dictionnaryManager.isValueInDictionnary((String)e.getValue())))
             .forEach(p -> {
                 String fromValueAsString = (String)fromProps.get(p.getKey());
                 if (fromValueAsString == null) {
