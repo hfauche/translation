@@ -270,9 +270,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     }
     
     private void onExit() {
-        try {
-            preferencesManager.savePreferences();
-        } catch (PreferencesException ex) {}
+        preferencesManager.savePreferences();
     }
     
     private void init() {
@@ -348,13 +346,8 @@ public class Application extends JFrame implements ActionListener, Colors {
             DictionnaryManager dictionnaryManager = new DictionnaryManager();
             final PropertiesManager propertiesManager = new PropertiesManager(dictionnaryManager);
             PreferencesManager preferencesManager = new PreferencesManager(propertiesManager);
-            try {
-                preferencesManager.loadPreferences();
-                dictionnaryManager.loadDictionnary();
-            } catch (PreferencesException ex) {
-                JOptionPane.showMessageDialog(null, "Unable to load preferences");
-                System.exit(0);
-            }
+            preferencesManager.loadPreferences();
+            dictionnaryManager.loadDictionnary();
             createAndShowGUI(preferencesManager, propertiesManager);
         });
     }
