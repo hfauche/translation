@@ -60,12 +60,12 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JScrollPane jScrollPane = new JScrollPane(table);
     private final JPanel legendPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
     private final JLabel legendLabel = new JLabel("Legend: ");
-    private final JLabel deletedLegend = new JLabel("  Deleted  ");
-    private final JLabel addedLegend = new JLabel("  Added  ");
+    private final JLabel deletedLegend = new JLabel("  Missing  ");
+    private final JLabel addedLegend = new JLabel("  Unused  ");
     private final JLabel untranslatedLegend = new JLabel("  Not translated  ");
     private final JPanel northPanel = new JPanel();
-    private final JButton filterDeletedButton = new JButton("Show deleted");
-    private final JButton filterAddedButton = new JButton("Show added");
+    private final JButton filterDeletedButton = new JButton("Show missing");
+    private final JButton filterAddedButton = new JButton("Show unused");
     private final JButton filterUntranslatedButton = new JButton("Show untranslated");
     private File fromFile, toFile;
     private FileBasedConfigurationBuilder<PropertiesConfiguration> fromBuilder, toBuilder;
