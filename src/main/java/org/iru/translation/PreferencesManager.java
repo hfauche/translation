@@ -39,7 +39,13 @@ public class PreferencesManager {
             if (!f.exists()) {
                 f.createNewFile();
             }
-            applicationProperties.store(new FileWriter(f));
+            try (FileWriter fw = new FileWriter(f)) {
+                try {
+                    applicationProperties.store(fw);
+                } catch (TranslationException ex) {
+                    throw new PreferencesException("Unable to save preferences", ex);
+                }
+            }
         } catch (IOException ex) {
             throw new PreferencesException("Unable to save preferences", ex);
         }

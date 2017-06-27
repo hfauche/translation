@@ -48,7 +48,8 @@ public class PropertiesManager {
         fromProps.entrySet().stream()
             .filter(e -> (!dictionnaryManager.isKeyInDictionnary(e.getKey()) && !dictionnaryManager.isValueInDictionnary(e.getValue().getValue())))
             .forEach(e -> {
-                String toValueAsString = toProps.get(e.getKey()).getValue();
+                final org.iru.translation.io.Property toProp = toProps.get(e.getKey());
+                String toValueAsString = toProp !=null ? toProp.getValue() : null;
                 final String fromValueAsString = e.getValue().getValue();
                 if (toValueAsString == null) {
                     result.add(new Property(e.getKey(), fromValueAsString, null, Action.DELETED));
@@ -61,10 +62,11 @@ public class PropertiesManager {
             });
         toProps.entrySet().stream()
             .filter(e -> (!dictionnaryManager.isKeyInDictionnary(e.getKey()) && !dictionnaryManager.isValueInDictionnary(e.getValue().getValue())))
-            .forEach(p -> {
-                String fromValueAsString = fromProps.get(p.getKey()).getValue();
+            .forEach(e -> {
+                final org.iru.translation.io.Property fromProp = fromProps.get(e.getKey());
+                String fromValueAsString = fromProp !=null ? fromProp.getValue() : null;
                 if (fromValueAsString == null) {
-                    result.add(new Property(p.getKey(), null, p.getValue().getValue(), Action.ADDED));
+                    result.add(new Property(e.getKey(), null, e.getValue().getValue(), Action.ADDED));
                 }
             });
         Collections.sort(result);

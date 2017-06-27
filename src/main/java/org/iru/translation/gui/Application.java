@@ -31,6 +31,10 @@ import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.PreferencesManager;
 import org.iru.translation.TranslationException;
+import static org.iru.translation.gui.Colors.ADDED_COLOR;
+import static org.iru.translation.gui.Colors.DELETED_COLOR;
+import static org.iru.translation.gui.Colors.MAIN_COLOR;
+import static org.iru.translation.gui.Colors.UNTRANSLATED_COLOR;
 import org.iru.translation.io.Properties;
 import org.iru.translation.io.PropertiesManager;
 import org.iru.translation.model.PropertyTableModel;
@@ -68,50 +72,6 @@ public class Application extends JFrame implements ActionListener, Colors {
     private Application(PreferencesManager preferencesManager, PropertiesManager propertiesManager) {
         this.preferencesManager = preferencesManager;
         this.propertiesManager = propertiesManager;
-        
-        //Create and set up the window.
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("Translation tool");
-        this.setBackground(MAIN_COLOR);
-        table.setDefaultRenderer(Object.class, new PropertyCellRenderer());
-
-        //Create and set up the content pane.
-        mainPanel.setOpaque(true);
-        setContentPane(mainPanel);
-
-        fromOpenButton.addActionListener(this);
-        toOpenButton.addActionListener(this);
-        reloadButton.addActionListener(this);
-        exportButton.addActionListener(this);
-        filterDeletedButton.addActionListener(this);
-        filterAddedButton.addActionListener(this);
-        filterUntranslatedButton.addActionListener(this);
-        
-        reloadButton.setEnabled(false);
-        
-        resetFilters();
-        filterDeletedButton.setEnabled(false);
-        filterAddedButton.setEnabled(false);
-        filterUntranslatedButton.setEnabled(false);
-
-        add(jScrollPane, BorderLayout.CENTER);
-
-        northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
-        add(northPanel, BorderLayout.NORTH);
-
-        addLegendPanel();
-        addFilesPanel();
-        addToolbar();
-        addCopyCapability();
-        
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent winEvt) {
-                onExit();
-            }
-        });
-        
-        
     }
 
     private void resetFilters() {
@@ -255,7 +215,6 @@ public class Application extends JFrame implements ActionListener, Colors {
                 propertiesManager.export(tableModel);
             } catch (TranslationException ex) {
                 JOptionPane.showMessageDialog(this, ex);
-                return;
             }
         }
     }
@@ -266,12 +225,61 @@ public class Application extends JFrame implements ActionListener, Colors {
         } catch (PreferencesException ex) {}
     }
     
+    private void init() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Translation tool");
+        this.setBackground(MAIN_COLOR);
+        table.setDefaultRenderer(Object.class, new PropertyCellRenderer());
+
+        mainPanel.setOpaque(true);
+        setContentPane(mainPanel);
+
+        fromOpenButton.addActionListener(this);
+        toOpenButton.addActionListener(this);
+        reloadButton.addActionListener(this);
+        exportButton.addActionListener(this);
+//        importButton.addActionListener(this);
+//        saveButton.addActionListener(this);
+        filterDeletedButton.addActionListener(this);
+        filterAddedButton.addActionListener(this);
+        filterUntranslatedButton.addActionListener(this);
+        
+        reloadButton.setEnabled(false);
+//        saveButton.setEnabled(false);
+        exportButton.setEnabled(false);
+//        importButton.setEnabled(false);
+        
+        resetFilters();
+        filterDeletedButton.setEnabled(false);
+        filterAddedButton.setEnabled(false);
+        filterUntranslatedButton.setEnabled(false);
+
+        add(jScrollPane, BorderLayout.CENTER);
+
+        northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
+        add(northPanel, BorderLayout.NORTH);
+
+        addLegendPanel();
+        addFilesPanel();
+        addToolbar();
+        addCopyCapability();
+        
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent winEvt) {
+                onExit();
+            }
+        });
+        
+    }
+    
     /**
      * Create the GUI and show it. For thread safety, this method should be
      * invoked from the event-dispatching thread.
      */
     private static void createAndShowGUI(PreferencesManager preferencesManager, PropertiesManager propertiesManager) {
         Application frame = new Application(preferencesManager, propertiesManager);
+        frame.init();
         frame.setSize(880, 600);
         frame.setLocationRelativeTo(null);//center
         try {

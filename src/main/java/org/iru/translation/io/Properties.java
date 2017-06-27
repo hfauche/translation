@@ -1,11 +1,11 @@
 package org.iru.translation.io;
 
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -47,11 +47,16 @@ public class Properties extends LinkedList<Property> {
         }
     }
 
-    public void store(FileWriter fileWriter) {
-        stream()
-            .forEach(p -> {
+    public void store(FileWriter fileWriter) throws TranslationException {
+        Iterator<Property> i = iterator();
+        while (i.hasNext()) {
+            Property p = i.next();
+            try {
                 fileWriter.write(p.getKey() + "=" + p.getValue() + "\r\n");
-        });
+            } catch (IOException ex) {
+                throw new TranslationException("Unable to store properties", ex);
+            }
+        }
     }
     
     public void set(String key, String value) {
@@ -61,7 +66,7 @@ public class Properties extends LinkedList<Property> {
         } else {
             final Property property = new Property(key, value, Property.Type.ENTRY);
             entries.put(key, property);
-            add(p);
+            add(property);
         }
     }
     
