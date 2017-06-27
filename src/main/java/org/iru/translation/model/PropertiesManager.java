@@ -75,7 +75,7 @@ public class PropertiesManager {
                     result.add(new Property(k, fromValueAsString, toValueAsString, Action.UNTRANSLATED, updater));
                 } else if (!insertedkeys.contains(k)) {
                     insertedkeys.add(k);
-                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE));
+                    result.add(new Property(k, fromValueAsString, toValueAsString, Action.NONE, updater));
                 }
             });
         Stream.generate(toProps.getKeys()::next).limit(toProps.size())
