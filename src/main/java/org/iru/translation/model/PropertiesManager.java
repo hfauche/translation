@@ -55,7 +55,7 @@ public class PropertiesManager {
     
     public List<Property> loadProperties(Configuration props) {
         return Stream.generate(props.getKeys()::next).limit(props.size())
-            .filter(k -> !dictionnaryManager.isInDictionnary(props.getString(k)))
+            .filter(k -> (!dictionnaryManager.isKeyInDictionnary(k) && !dictionnaryManager.isValueInDictionnary(props.getString(k))))
             .sorted(Comparator.naturalOrder())
             .map(k -> new Property(k, props.getString(k), null, Action.NONE))
             .collect(Collectors.toList());
@@ -65,7 +65,7 @@ public class PropertiesManager {
         List<Property> result = new LinkedList<>();
         Set<Object> insertedkeys = new HashSet<>(fromProps.size());
         Stream.generate(fromProps.getKeys()::next).limit(fromProps.size())
-            .filter(k -> !dictionnaryManager.isInDictionnary(fromProps.getString(k)))
+            .filter(k -> (!dictionnaryManager.isKeyInDictionnary(k) && !dictionnaryManager.isValueInDictionnary(fromProps.getString(k))))
             .forEach(k -> {
                 String toValueAsString = toProps.getString(k);
                 final String fromValueAsString = fromProps.getString(k);
@@ -79,7 +79,7 @@ public class PropertiesManager {
                 }
             });
         Stream.generate(toProps.getKeys()::next).limit(toProps.size())
-            .filter(k -> !dictionnaryManager.isInDictionnary(toProps.getString(k)))
+            .filter(k -> (!dictionnaryManager.isKeyInDictionnary(k) && !dictionnaryManager.isValueInDictionnary(toProps.getString(k))))
             .forEach(k -> {
                 String fromValueAsString = fromProps.getString(k);
                 if (fromValueAsString == null) {
