@@ -250,7 +250,7 @@ public class Application extends JFrame implements ActionListener, Colors {
             filterUntranslatedButton.setBackground(tableModel.isFilterUnstranslated()? UNTRANSLATED_COLOR : Color.LIGHT_GRAY);
         } else if (event.getSource() == exportButton) {
             try {
-                propertiesManager.export(tableModel);
+                propertiesManager.exportToCsv(tableModel);
             } catch (TranslationException ex) {
                 JOptionPane.showMessageDialog(this, ex);
             }

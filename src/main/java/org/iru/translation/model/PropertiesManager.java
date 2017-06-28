@@ -90,7 +90,7 @@ public class PropertiesManager {
         return result;
     }
     
-    public void export(PropertyTableModel tableModel) throws TranslationException {
+    public void exportToCsv(PropertyTableModel tableModel) throws TranslationException {
         String newLine = System.getProperty("line.separator");
         File f = new File(System.getProperty("java.io.tmpdir") + "/translations-export.csv"); 
         try (FileWriter fw = new FileWriter(f)) {
