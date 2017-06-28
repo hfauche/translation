@@ -126,8 +126,8 @@ public class PropertiesManager {
                 if (prop.length != 2) {
                     throw new TranslationException("Format error at line " + is.getLineNumber());
                 }
-                String key = prop[0];
-                String value = prop[1];
+                String key = prop[0].trim();
+                String value = prop[1].trim();
                 props.put(key, value);
                 line = is.readLine();
             }
