@@ -15,7 +15,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -32,7 +31,8 @@ import org.iru.translation.DictionnaryManager;
 import org.iru.translation.PreferencesException;
 import org.iru.translation.PreferencesManager;
 import org.iru.translation.TranslationException;
-import org.iru.translation.model.PropertiesManager;
+import org.iru.translation.io.Properties;
+import org.iru.translation.io.PropertiesManager;
 import org.iru.translation.model.PropertyTableModel;
 import org.iru.translation.model.PropertyTableModel.Property;
 

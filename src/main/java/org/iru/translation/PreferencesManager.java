@@ -1,10 +1,10 @@
 package org.iru.translation;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
-import org.iru.translation.model.PropertiesManager;
+import org.iru.translation.io.Properties;
+import org.iru.translation.io.PropertiesManager;
 
 public class PreferencesManager {
     public final static String FILES_DIRECTORY = "files.directory";
@@ -39,18 +39,18 @@ public class PreferencesManager {
             if (!f.exists()) {
                 f.createNewFile();
             }
-            applicationProperties.store(new FileOutputStream(f), "Translation Application Preferences");
+            applicationProperties.store(new FileWriter(f));
         } catch (IOException ex) {
             throw new PreferencesException("Unable to save preferences", ex);
         }
     }
 
     public void setPreference(String key, String value) {
-        applicationProperties.setProperty(key, value);
+        applicationProperties.set(key, value);
     }
 
     public String getPreference(String key) {
-        return applicationProperties.getProperty(key);
+        return applicationProperties.entrySet().isEmpty() ? null: applicationProperties.get(key).getValue();
     }
     
 }
