@@ -14,6 +14,7 @@ import org.iru.translation.TranslationException;
 public class Properties extends LinkedList<Property> {
     
     private final Map<String, Property> entries = new HashMap<>();
+    private final static String DOS_CRLF = "\r\n";
 
     void load(FileReader reader) throws TranslationException {
         try (LineNumberReader lr =new LineNumberReader(reader)) {
@@ -35,15 +36,15 @@ public class Properties extends LinkedList<Property> {
     protected Property parse(String line, int lineNumber) throws TranslationException {
         String lineToParse = line.trim();
         if (lineToParse.isEmpty()) {
-            return new Property(Property.Type.BLANK_LINE);
+            return new Property(Property.Type.BLANK_LINE, lineNumber-1);
         } else if (lineToParse.startsWith("#")) {
-            return new Property(Property.Type.COMMENT);
+            return new Property(line, Property.Type.COMMENT, lineNumber-1);
         } else {
             if (!line.contains("=")) {
                 throw new TranslationException("Invalid property line: " + line);
             }
             String[] prop = line.split("=");
-            return new Property(prop[0].trim(), prop[1].trim(), Property.Type.ENTRY);
+            return new Property(prop[0].trim(), prop[1].trim(), Property.Type.ENTRY, lineNumber-1);
         }
     }
 
@@ -52,22 +53,36 @@ public class Properties extends LinkedList<Property> {
         while (i.hasNext()) {
             Property p = i.next();
             try {
-                fileWriter.write(p.getKey() + "=" + p.getValue() + "\r\n");
+                switch(p.getType()) {
+                    case ENTRY:
+                        fileWriter.write(p.getKey() + "=" + p.getValue());
+                        break;
+                    case COMMENT:
+                        fileWriter.write(p.getValue());
+                        break;
+                    case BLANK_LINE:
+                        break;
+                }
+                fileWriter.write(DOS_CRLF);
             } catch (IOException ex) {
                 throw new TranslationException("Unable to store properties", ex);
             }
         }
     }
     
-    public void set(String key, String value) {
+    public void set(String key, String value, int pos) {
         Property p = entries.get(key);
         if (p != null) {
             p.setValue(value);
         } else {
-            final Property property = new Property(key, value, Property.Type.ENTRY);
+            final Property property = new Property(key, value, Property.Type.ENTRY, pos);
             entries.put(key, property);
-            add(property);
+            add(pos, property);
         }
+    }
+    
+    public void set(String key, String value) {
+        set(key, value, size());
     }
     
     public Set<Map.Entry<String, Property>> entrySet() {

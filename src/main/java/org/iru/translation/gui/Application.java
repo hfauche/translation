@@ -8,7 +8,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ActionListener;   
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -47,6 +47,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private final JButton toOpenButton = new JButton("Choose TO file");
     private final JButton reloadButton = new JButton("Reload");
     private final JButton exportButton = new JButton("Export");
+    private final JButton saveButton = new JButton("Save");    
     private final JPanel files = new JPanel(new FlowLayout(FlowLayout.LEFT));
     private final JLabel filesLabel = new JLabel("Files to compare: ");
     private final JLabel filesBetweenLabel = new JLabel(" <==> ");
@@ -68,6 +69,7 @@ public class Application extends JFrame implements ActionListener, Colors {
     private File fromFile, toFile;
     private final PreferencesManager preferencesManager;
     private final PropertiesManager propertiesManager;
+    private Properties fromProps, toProps;
 
     private Application(PreferencesManager preferencesManager, PropertiesManager propertiesManager) {
         this.preferencesManager = preferencesManager;
@@ -125,6 +127,7 @@ public class Application extends JFrame implements ActionListener, Colors {
         toolbar.add(fromOpenButton);
         toolbar.add(toOpenButton);
         toolbar.add(reloadButton);
+        toolbar.add(saveButton);
         toolbar.add(exportButton);
         toolbar.add(filterDeletedButton);
         toolbar.add(filterAddedButton);
@@ -155,7 +158,6 @@ public class Application extends JFrame implements ActionListener, Colors {
             }
             int returnVal = fc.showOpenDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Properties fromProps;
                 File file = fc.getSelectedFile();
                 fromLabel.setText("" + file.getName());
                 fromFile = file;
@@ -175,7 +177,6 @@ public class Application extends JFrame implements ActionListener, Colors {
             }
             int returnVal = fc.showSaveDialog(Application.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                Properties fromProps, toProps;
                 toFile = fc.getSelectedFile();
                 toLabel.setText("" + toFile.getName());
                 try {
@@ -189,10 +190,11 @@ public class Application extends JFrame implements ActionListener, Colors {
                 filterDeletedButton.setEnabled(true);
                 filterAddedButton.setEnabled(true);
                 filterUntranslatedButton.setEnabled(true);
+                exportButton.setEnabled(true);
                 reloadButton.setEnabled(true);
+                saveButton.setEnabled(true);
             }
         } else if (event.getSource() == reloadButton) {
-            Properties fromProps, toProps;
             try {
                 fromProps = propertiesManager.readProperties(fromFile);
                 toProps = propertiesManager.readProperties(toFile);
@@ -210,9 +212,15 @@ public class Application extends JFrame implements ActionListener, Colors {
         } else if (event.getSource() == filterUntranslatedButton) {
             tableModel.toggleFilterUntranslated();
             filterUntranslatedButton.setBackground(tableModel.isFilterUnstranslated()? UNTRANSLATED_COLOR : Color.LIGHT_GRAY);
+        } else if (event.getSource() == saveButton) {
+            try {
+                propertiesManager.save(toProps, fromProps, (PropertyTableModel)table.getModel(), toFile);
+            } catch (TranslationException ex) {
+                JOptionPane.showMessageDialog(this, ex);
+            }
         } else if (event.getSource() == exportButton) {
             try {
-                propertiesManager.export(tableModel);
+                propertiesManager.exportToCsv(tableModel);
             } catch (TranslationException ex) {
                 JOptionPane.showMessageDialog(this, ex);
             }
@@ -239,13 +247,13 @@ public class Application extends JFrame implements ActionListener, Colors {
         reloadButton.addActionListener(this);
         exportButton.addActionListener(this);
 //        importButton.addActionListener(this);
-//        saveButton.addActionListener(this);
+        saveButton.addActionListener(this);
         filterDeletedButton.addActionListener(this);
         filterAddedButton.addActionListener(this);
         filterUntranslatedButton.addActionListener(this);
         
         reloadButton.setEnabled(false);
-//        saveButton.setEnabled(false);
+        saveButton.setEnabled(false);
         exportButton.setEnabled(false);
 //        importButton.setEnabled(false);
         

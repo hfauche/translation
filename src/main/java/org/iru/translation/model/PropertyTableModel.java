@@ -126,15 +126,28 @@ public class PropertyTableModel extends AbstractTableModel {
         if (!filterDeleted && !filterAdded && !filterUnstranslated) {
             return true;
         }
-        return (p.getAction() == Action.DELETED && filterDeleted)
-                || (p.getAction() == Action.ADDED && filterAdded)
+        return (p.getAction() == Action.MISSING && filterDeleted)
+                || (p.getAction() == Action.OBSOLETE && filterAdded)
                 || (p.getAction() == Action.UNTRANSLATED && filterUnstranslated);
     }
 
+ 
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (columnIndex == 2) {
+            filteredlist.get(rowIndex).setValueTo((String)aValue);
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex == 2;
+    }
+    
     public static class Property implements Comparable<Property> {
         private final String key;
         private final String valueFrom;
-        private final String valueTo;
+        private String valueTo;
         private final Action action;
 
         public Property(String key, String valueFrom, String valueTo, Action action) {
@@ -160,11 +173,13 @@ public class PropertyTableModel extends AbstractTableModel {
             return action;
         }
         
+        private void setValueTo(String valueTo) {
+            this.valueTo = valueTo;
+        }
+        
         @Override
         public int compareTo(Property o) {
             return key.compareToIgnoreCase(o.key);
         }
-        
     }
-
 }
