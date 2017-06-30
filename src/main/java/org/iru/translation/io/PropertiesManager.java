@@ -97,6 +97,34 @@ public class PropertiesManager {
         }
     }
 
+    public void importFromCsv(Properties toProps, File f) throws TranslationException {
+        final FileReader fileReader;
+        try {
+            fileReader = new FileReader(f);
+        } catch (FileNotFoundException ex) {
+            throw new TranslationException("File to import not found", ex);
+        }
+        LineNumberReader is = new LineNumberReader(fileReader);
+        Map<String, String> props = new HashMap<>();
+        try {
+            String line = is.readLine();
+            while (line != null) {
+                String[] prop = line.split(";");
+                if (prop.length != 2) {
+                    throw new TranslationException("Format error at line " + is.getLineNumber());
+                }
+                String key = prop[0].trim();
+                String value = prop[1].trim();
+                props.put(key, value);
+                line = is.readLine();
+            }
+        }
+        catch (IOException ex) {
+            throw new TranslationException("Error when reading CSV file", ex);
+        }
+        props.forEach((k, v) -> toProps.set(k, v));
+    }
+
     public void save(Properties toProps, Properties fromProps, PropertyTableModel model, File f) throws TranslationException {
         for (int i=0; i<model.getRowCount(); i++) {
             Property p = model.getModel(i);
