@@ -30,11 +30,7 @@ public class PropertiesManager {
     
     public Properties readProperties(File f) throws TranslationException {
         Properties p = new Properties();
-        try(FileReader reader = new FileReader(f)) {
-            p.load(reader);
-        } catch (IOException ex) {
-            throw new TranslationException("Unable to parse file", ex);
-        }
+        p.load(f);
         return p;
     }
     

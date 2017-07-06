@@ -1,5 +1,6 @@
 package org.iru.translation.io;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,25 +11,35 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.iru.translation.TranslationException;
+import org.iru.translation.io.FileFormat.FileType;
 
 public class Properties extends LinkedList<Property> {
     
     private final Map<String, Property> entries = new HashMap<>();
-    private final static String DOS_CRLF = "\r\n";
+    private FileType CRLF;
 
-    void load(FileReader reader) throws TranslationException {
-        try (LineNumberReader lr =new LineNumberReader(reader)) {
-            String line;
-            line = lr.readLine();
-            while (line != null) {
-                final Property property = parse(line, lr.getLineNumber());
-                if (property.getType() == Property.Type.ENTRY) {
-                    entries.put(property.getKey(), property);
-                }
-                add(property);
-                line = lr.readLine();
-            }
+    void load(File f) throws TranslationException {
+        try {
+            CRLF = FileFormat.discover(f);
         } catch (IOException ex) {
+            throw new TranslationException("Unable to read property file", ex);
+        }
+        try(FileReader reader = new FileReader(f)) {
+            try (LineNumberReader lr =new LineNumberReader(reader)) {
+                String line = lr.readLine();
+                while (line != null) {
+                    final Property property = parse(line, lr.getLineNumber());
+                    if (property.getType() == Property.Type.ENTRY) {
+                        entries.put(property.getKey(), property);
+                    }
+                    add(property);
+                    line = lr.readLine();
+                }
+            } catch (IOException ex) {
+                throw new TranslationException("Unable to read property file", ex);
+            }
+        }
+        catch (IOException ex) {
             throw new TranslationException("Unable to read property file", ex);
         }
     }
@@ -63,7 +74,7 @@ public class Properties extends LinkedList<Property> {
                     case BLANK_LINE:
                         break;
                 }
-                fileWriter.write(DOS_CRLF);
+                fileWriter.write(CRLF.getEOL());
             } catch (IOException ex) {
                 throw new TranslationException("Unable to store properties", ex);
             }
